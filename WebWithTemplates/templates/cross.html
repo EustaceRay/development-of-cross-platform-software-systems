@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Забегайлов А.Д. web</title>
+    <style>
+        pre {
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .centered {
+            text-align: center;
+            margin: 0;
+            font-weight: normal;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="centered">PASART</div>
+    <div class="centered">CREATIVE COMPUTING</div>
+    <div class="centered">MORRISTOWN NEW JERSEY</div>
+    <div><br></div>
+    <div><br></div>
+    <div><br></div>
+
+    <div>THIS PROGRAM CREATES ARTIST DESIGNS BASED ON PASCAL'S TRIANGLE.</div>
+    <div>YOU HAVE 3 BASIC TYPES OF DESIGNS TO SELECT FROM:</div>
+    
+    <div>1. A SINGLE PASCAL'S TRIANGLE (PLAYED WITH AN ARTISTIC FLARE)</div>
+    <div>2. TWO 'ARTSY' PASCAL'S TRIANGLES PRINTED BACK TO BACK</div>
+    <div>3. FOUR 'ARTSY' TRIANGLES IN THE CORNER OF A SQUARE ARRAY.</div>
+    
+    <div id="formContainer">
+        <div id="step1">
+            <label for="option">WHAT'S YOUR PLEASURE? 1, 2 OR 3?:</label>
+            <input type="number" id="option" min="1" max="3" required>
+            <br>
+        </div>
+        <div id="step2" class="hidden">
+            <label for="blanks">WHICH MULTIPLES DO YOU WANT REPRESENTED WITH BLANKS?:</label>
+            <input type="number" id="blanks" required>
+            <br>
+        </div>
+        <div id="step3" class="hidden">
+            <label for="size">HOW MANY ROWS AND COLUMNS IN THE ARRAY (36 IS MAXIMUM)?:</label>
+            <input type="number" id="size" min="1" max="36" required>
+            <br>
+        </div>
+    </div>
+    
+    <pre id="output"></pre>
+
+    <script>
+        let currentStep = 1;
+
+        const showStep = (step) => {
+            document.getElementById(`step${step}`).classList.remove('hidden');
+        };
+
+        document.getElementById('option').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                currentStep++;
+                showStep(currentStep);
+                if (currentStep > 3) {
+                    document.getElementById('formContainer').classList.add('hidden');
+                    processForm();
+                }
+            }
+        });
+
+        document.getElementById('blanks').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                currentStep++;
+                showStep(currentStep);
+            }
+        });
+
+        document.getElementById('size').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                processForm();
+            }
+        });
+
+        const processForm = () => {
+            const option = document.getElementById('option').value;
+            const blanks = parseInt(document.getElementById('blanks').value);
+            const size = parseInt(document.getElementById('size').value);
+            const output = document.getElementById('output');
+
+            const p = Array.from({ length: 36 }, () => Array(36).fill(0));
+            let result = '';
+
+            const generateTriangle = () => {
+                for (let r = 0; r < size; r++) {
+                    for (let c = 0; c <= r; c++) {
+                        if (c === 0 || c === r) {
+                            p[r][c] = 1;
+                        } else {
+                            p[r][c] = p[r - 1][c - 1] + p[r - 1][c];
+                        }
+                    }
+                }
+            };
+
+            const displayTriangle = (single = true) => {
+                for (let r = 0; r < size; r++) {
+                    for (let c = 0; c <= r; c++) {
+                        result += p[r][c] % blanks === 0 ? '  ' : '* ';
+                    }
+                    result += '\n';
+                }
+                if (!single) {
+                    result += '\n';
+                    for (let r = 0; r < size; r++) {
+                        for (let c = 0; c <= r; c++) {
+                            result += p[r][c] % blanks === 0 ? '  ' : '* ';
+                        }
+                        result += '\n';
+                    }
+                }
+            };
+
+            if (option === '1') {
+                generateTriangle();
+                displayTriangle();
+            } else if (option === '2') {
+                generateTriangle();
+                displayTriangle(false); // Два треугольника
+            } else if (option === '3') {
+                const halfSize = Math.floor(size / 2);
+                const corners = [[], [], [], []];
+
+                for (let r = 0; r < halfSize; r++) {
+                    for (let c = 0; c <= r; c++) {
+                        corners[0][r] = corners[0][r] || [];
+                        corners[0][r][c] = p[r][c] = (c === 0 || c === r) ? 1 : p[r - 1][c - 1] + p[r - 1][c];
+                    }
+                }
+
+                for (let r = 0; r < halfSize; r++) {
+                    for (let c = 0; c <= r; c++) {
+                        corners[1][r] = corners[1][r] || [];
+                        corners[1][r][c] = p[r][c + halfSize] = (c === 0 || c === r) ? 1 : p[r - 1][c - 1] + p[r - 1][c];
+                    }
+                }
+
+                for (let r = 0; r < halfSize; r++) {
+                    for (let c = 0; c <= r; c++) {
+                        corners[2][r] = corners[2][r] || [];
+                        corners[2][r][c] = p[r + halfSize][c] = (c === 0 || c === r) ? 1 : p[r - 1][c - 1] + p[r - 1][c];
+                    }
+                }
+
+                for (let r = 0; r < halfSize; r++) {
+                    for (let c = 0; c <= r; c++) {
+                        corners[3][r] = corners[3][r] || [];
+                        corners[3][r][c] = p[r + halfSize][c + halfSize] = (c === 0 || c === r) ? 1 : p[r - 1][c - 1] + p[r - 1][c];
+                    }
+                }
+
+                for (let r = 0; r < halfSize; r++) {
+                    result += corners[0][r].map(v => (v % blanks === 0 ? '  ' : '* ')).join('') + '    ';
+                    result += corners[1][r].map(v => (v % blanks === 0 ? '  ' : '* ')).join('') + '\n';
+                }
+                for (let r = 0; r < halfSize; r++) {
+                    result += corners[2][r].map(v => (v % blanks === 0 ? '  ' : '* ')).join('') + '    ';
+                    result += corners[3][r].map(v => (v % blanks === 0 ? '  ' : '* ')).join('') + '\n';
+                }
+            }
+
+            output.textContent = result;
+        };
+
+        // Показать первый шаг
+        showStep(currentStep);
+    </script>
+
+</body>
+</html>
