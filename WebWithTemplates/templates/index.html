@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasart Game</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        .centered {
+            text-align: center;
+            margin: 0;
+        }
+        .compact {
+            margin: 0;
+            padding: 0;
+            line-height: 1.2;
+        }
+        .input-container {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .input-field {
+            margin-left: 10px;
+            width: 100px;
+            height: 20px;
+        }
+        pre {
+            white-space: pre;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Заголовок -->
+    <div class="centered">PASART</div>
+    <div class="centered">CREATIVE COMPUTING</div>
+    <div class="centered">MORRISTOWN NEW JERSEY</div>
+    <div><br></div>
+    <div><br></div>
+    <div><br></div>
+
+    <!-- Описание -->
+    <div>THIS PROGRAM CREATES ARTIST DESIGNS BASED ON PASCAL'S TRIANGLE.</div>
+    <div>YOU HAVE 3 BASIC TYPES OF DESIGNS TO SELECT FROM:</div>
+    <div>1. A SINGLE PASCAL'S TRIANGLE (PLAYED WITH AN ARTISTIC FLARE)</div>
+    <div>2. TWO 'ARTSY' PASCAL'S TRIANGLES PRINTED BACK TO BACK</div>
+    <div>3. FOUR 'ARTSY' TRIANGLES IN THE CORNER OF</div>
+    <div>&nbsp;&nbsp;&nbsp;A SQUARE ARRAY.</div>
+
+    <!-- Поле ввода для выбора -->
+    <div class="input-container" id="input1-container">
+        <div>WHAT'S YOUR PLEASURE? 1, 2 OR 3:</div>
+        <input type="number" id="input1" class="input-field" min="1" max="3" required>
+    </div>
+
+    <!-- Поле ввода для кратности -->
+    <div class="input-container" id="input2-container" style="display: none;">
+        <div>WHICH MULTIPLES DO YOU WANT REPRESENTED WITH BLANKS:</div>
+        <input type="number" id="input2" class="input-field" required>
+    </div>
+
+    <!-- Поле ввода для размера -->
+    <div class="input-container" id="input3-container" style="display: none;">
+        <div>HOW MANY ROWS AND COLUMNS IN THE ARRAY (36 IS MAXIMUM):</div>
+        <input type="number" id="input3" class="input-field" min="1" max="36" required>
+    </div>
+
+    <!-- Вывод результата -->
+    <pre id="output">{{ output }}</pre>
+
+    <script>
+        document.getElementById('input1').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const input1 = parseInt(event.target.value);
+                if (input1 >= 1 && input1 <= 3) {
+                    document.getElementById('input2-container').style.display = 'flex';
+                    event.target.disabled = true;
+                    document.getElementById('input2').focus();
+                }
+            }
+        });
+
+        document.getElementById('input2').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const input2 = parseInt(event.target.value);
+                if (input2 > 0) {
+                    document.getElementById('input3-container').style.display = 'flex';
+                    event.target.disabled = true;
+                    document.getElementById('input3').focus();
+                }
+            }
+        });
+
+        document.getElementById('input3').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const input3 = parseInt(event.target.value);
+                if (input3 >= 1 && input3 <= 36) {
+                    event.target.disabled = true;
+                    runPasart();
+                }
+            }
+        });
+
+        function runPasart() {
+            const option = parseInt(document.getElementById('input1').value);
+            const blanks = parseInt(document.getElementById('input2').value);
+            const size = parseInt(document.getElementById('input3').value);
+            let output = '';
+
+            // Здесь будет логика, передающая данные в backend, а затем возвращающая результат
+            fetch('/run', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `o=${option}&q=${blanks}&t=${size}`
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('output').textContent = data;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+
+</body>
+</html>
